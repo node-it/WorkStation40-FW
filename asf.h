@@ -57,7 +57,7 @@
 #include <status_codes.h>
 
 // From module: Generic board support
-#include <board.h>
+//#include <board.h>
 
 // From module: Interrupt management - SAM implementation
 #include <interrupt.h>

@@ -37,13 +37,13 @@
 #
 
 # Path to top level ASF directory relative to this project directory.
-PRJ_PATH = ../xdk-asf-3.24.1/
+PRJ_PATH = ../xdk-asf-3.24.2
 
 # Target CPU architecture: cortex-m3, cortex-m4
 ARCH = cortex-m0plus
 
 # Target part: none, sam3n4 or sam4l4aa
-PART = samd11d14am
+PART = samd10d14am
 
 # Application target name. Given with suffix .a for library and .elf for a
 # standalone application.
@@ -57,9 +57,11 @@ current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 # List of C source files.
 # All C source paths are relative to PRJ_PATH
 CSRCS = \
-       ../$(current_dir)/workstation40.c                      \
+       ../$(current_dir)/workstation40.c                  \
+       ../$(current_dir)/board/board_init.c               \
        common/utils/interrupt/interrupt_sam_nvic.c        \
-       sam0/boards/samd11_xplained_pro/board_init.c       \
+       sam0/drivers/adc/adc_sam_d_r/adc.c                 \
+       sam0/drivers/adc/adc_sam_d_r/adc_callback.c        \
        sam0/drivers/port/port.c                           \
        sam0/drivers/sercom/i2c/i2c_sam0/i2c_slave.c       \
        sam0/drivers/sercom/i2c/i2c_sam0/i2c_slave_interrupt.c \
@@ -70,22 +72,24 @@ CSRCS = \
        sam0/drivers/system/interrupt/system_interrupt.c   \
        sam0/drivers/system/pinmux/pinmux.c                \
        sam0/drivers/system/system.c                       \
-       sam0/utils/cmsis/samd11/source/gcc/startup_samd11.c \
-       sam0/utils/cmsis/samd11/source/system_samd11.c     \
+       sam0/utils/cmsis/samd10/source/gcc/startup_samd10.c \
+       sam0/utils/cmsis/samd10/source/system_samd10.c     \
        sam0/utils/syscalls/gcc/syscalls.c
 
 # List of assembler source files.
-ASSRCS = 
+ASSRCS =
 
 
 # List of include paths.
 # All include file paths are relative to PRJ_PATH
 INC_PATH = \
        ../$(current_dir)                                  \
+       ../$(current_dir)/board                            \
        common/boards                                      \
        common/utils                                       \
        sam0/boards                                        \
-       sam0/boards/samd11_xplained_pro                    \
+       sam0/drivers/adc                                   \
+       sam0/drivers/adc/adc_sam_d_r                       \
        sam0/drivers/port                                  \
        sam0/drivers/sercom                                \
        sam0/drivers/sercom/i2c                            \
@@ -102,25 +106,26 @@ INC_PATH = \
        sam0/drivers/system/reset                          \
        sam0/drivers/system/reset/reset_sam_d_r            \
        sam0/utils                                         \
-       sam0/utils/cmsis/samd11/include                    \
-       sam0/utils/cmsis/samd11/source                     \
+       sam0/utils/cmsis/samd10/include                    \
+       sam0/utils/cmsis/samd10/source                     \
        sam0/utils/header_files                            \
        sam0/utils/preprocessor                            \
        thirdparty/CMSIS/Include                           \
-       thirdparty/CMSIS/Lib/GCC \
-       sam0/drivers/sercom/i2c/quick_start_slave_callback/samd11_xplained_pro/gcc
+       thirdparty/CMSIS/Lib/GCC
 
 # Additional search paths for libraries.
 LIB_PATH =  \
-       thirdparty/CMSIS/Lib/GCC                          
+       thirdparty/CMSIS/Lib/GCC
 
 # List of libraries to use during linking.
 LIBS =  \
-       arm_cortexM0l_math                                
+       arm_cortexM0l_math
 
 # Path relative to top level directory pointing to a linker script.
-LINKER_SCRIPT_FLASH = sam0/utils/linker_scripts/samd11/gcc/samd11d14am_flash.ld
-LINKER_SCRIPT_SRAM  = sam0/utils/linker_scripts/samd11/gcc/samd11d14am_sram.ld
+USE_LOCAL_LINK_SCRIPT = true
+LINKER_SCRIPT_FLASH = workstation40.ld
+#LINKER_SCRIPT_FLASH = sam0/utils/linker_scripts/samd10/gcc/samd10d14am_flash.ld
+#LINKER_SCRIPT_SRAM  = sam0/utils/linker_scripts/samd10/gcc/samd10d14am_sram.ld
 
 # Path relative to top level directory pointing to a linker script.
 DEBUG_SCRIPT_FLASH = sam0/boards/samd11_xplained_pro/debug_scripts/gcc/samd11_xplained_pro_flash.gdb
@@ -131,20 +136,20 @@ PROJECT_TYPE        = flash
 
 # Additional options for debugging. By default the common Makefile.in will
 # add -g3.
-DBGFLAGS = 
+DBGFLAGS =
 
 # Application optimization used during compilation and linking:
 # -O0, -O1, -O2, -O3 or -Os
-OPTIMIZATION = -Os
+OPTIMIZATION = -O2
 
 # Extra flags to use when archiving.
-ARFLAGS = 
+ARFLAGS =
 
 # Extra flags to use when assembling.
-ASFLAGS = 
+ASFLAGS =
 
 # Extra flags to use when compiling.
-CFLAGS = 
+CFLAGS =
 
 # Extra flags to use when preprocessing.
 #
@@ -156,14 +161,15 @@ CFLAGS =
 #   BOARD      Target board in use, see boards/board.h for a list.
 #   EXT_BOARD  Optional extension board in use, see boards/board.h for a list.
 CPPFLAGS = \
+       -D ADC_CALLBACK_MODE=true                          \
        -D ARM_MATH_CM0PLUS=true                           \
        -D BOARD=SAMD11_XPLAINED_PRO                       \
        -D I2C_SLAVE_CALLBACK_MODE=true                    \
-       -D __SAMD11D14AM__
+       -D __SAMD10D14AM__
 
 # Extra flags to use when linking
 LDFLAGS = \
 
 # Pre- and post-build commands
-PREBUILD_CMD = 
-POSTBUILD_CMD = 
+PREBUILD_CMD =
+POSTBUILD_CMD =
