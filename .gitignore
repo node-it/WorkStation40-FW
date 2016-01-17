@@ -1,0 +1,11 @@
+*.d
+*.elf
+*.fw
+*.hex
+*.lss
+*.map
+*.o
+*.sym
+*.bin
+fw.h
+cb/

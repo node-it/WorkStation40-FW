@@ -64,7 +64,6 @@ CSRCS = \
        sam0/drivers/adc/adc_sam_d_r/adc_callback.c        \
        sam0/drivers/port/port.c                           \
        sam0/drivers/sercom/i2c/i2c_sam0/i2c_slave.c       \
-       sam0/drivers/sercom/i2c/i2c_sam0/i2c_slave_interrupt.c \
        sam0/drivers/sercom/sercom.c                       \
        sam0/drivers/sercom/sercom_interrupt.c             \
        sam0/drivers/system/clock/clock_samd10_d11/clock.c \
@@ -140,7 +139,7 @@ DBGFLAGS =
 
 # Application optimization used during compilation and linking:
 # -O0, -O1, -O2, -O3 or -Os
-OPTIMIZATION = -O2
+OPTIMIZATION = -Os
 
 # Extra flags to use when archiving.
 ARFLAGS =
@@ -164,7 +163,7 @@ CPPFLAGS = \
        -D ADC_CALLBACK_MODE=true                          \
        -D ARM_MATH_CM0PLUS=true                           \
        -D BOARD=SAMD11_XPLAINED_PRO                       \
-       -D I2C_SLAVE_CALLBACK_MODE=true                    \
+       -D I2C_SLAVE_CALLBACK_MODE=false                   \
        -D __SAMD10D14AM__
 
 # Extra flags to use when linking
@@ -172,4 +171,4 @@ LDFLAGS = \
 
 # Pre- and post-build commands
 PREBUILD_CMD =
-POSTBUILD_CMD =
+POSTBUILD_CMD = cp workstation40.bin fw.bin; xxd -i fw.bin fw.h

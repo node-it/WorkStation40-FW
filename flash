@@ -1,0 +1,5 @@
+#!/bin/sh
+
+printf "Flashing your device !"
+sudo openocd -f interface/cmsis-dap.cfg -f target/at91samdXX.cfg -c "program workstation40.elf verify reset exit"
+
