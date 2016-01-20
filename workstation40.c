@@ -21,11 +21,12 @@
  * = SAMD10 I2C server =
  *
  * This I2C server opens up the entire SAMD10 chip to be used anyway anyone likes.
- * The server only has two commands, read one 32 bit memory location and write one
- * 32 bit memory location !
+ * The server only has three commands, read one 32 bit memory location, write one
+ * 32 bit memory location and execute from a location.
  * Effectively this means that the user can access any memory location and/or any
- * control register in the device, thus exposing all the functionality that the
- * device has.
+ * control register in the device thus exposing all the functionality that the
+ * device has. You can also upload short programs and execute them inside the
+ * SAMD10 device, making the Workstation40 board a very powerfull I/O processor.
  *
  * == I2C operations ==
  *
@@ -39,7 +40,13 @@
  * the memory location that shall be written. This is immediatly followed by a
  * 32 bit write operation with the data that shall be written.
  *
- * === Caution ===
+ * === Execute from Location ===
+ * This operation allows the user to execute code from inside the SAMD10 device.
+ * The execute from location command is a special case of the write memory
+ * location command. A memory address of 0xffffffff is interpreted as the special
+ * command execute from location and the value is used as the jump address.
+ *
+ * == Caution ==
  * Read and write operation must be carried out on a valid function register or
  * memory address, furthermore the address that you supply must also be on an even
  * 32 bit boundary, otherwise the device will crash and must be reset.
@@ -49,6 +56,9 @@
 #include <asf.h>
 #include "board/samd10_workstation40.h"
 
+// A local type for function calls
+typedef void (*func)(void);
+
 static void configure_i2c_slave(void);
 static struct i2c_slave_packet packet;
 
@@ -56,6 +66,8 @@ static struct i2c_slave_packet packet;
 #define TRANSACTION_LENGTH    8
 /* Address of the slave */
 #define SLAVE_ADDRESS         0x12
+/* Special commands */
+#define EXECUTE_FROM          0xffffffff
 
 struct i2c_slave_module i2c_slave_instance;
 
@@ -99,6 +111,7 @@ static void handle_i2c_write(void)
   uint32_t mem;
   uint32_t *mem_ptr;
   uint32_t value;
+  func jumpFunc;
 
   // Collect the memory pointer
   MSB0W(mem) = read_buffer[0];
@@ -112,9 +125,20 @@ static void handle_i2c_write(void)
   MSB2W(value) = read_buffer[6];
   MSB3W(value) = read_buffer[7];
 
-  // And finally write the value to the memory
-  mem_ptr = (uint32_t *)mem;
-  *mem_ptr = value;
+  // Check for any special commands
+  switch (mem) {
+    case EXECUTE_FROM:
+      /* Special command, executeFrom */
+      jumpFunc = (func)value;
+      jumpFunc();
+      break;
+
+    default:
+      // Not a command so write the value to the memory
+      mem_ptr = (uint32_t *)mem;
+      *mem_ptr = value;
+      break;
+  }
 }
 
 static void handle_i2c_read(void)
